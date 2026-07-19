@@ -1,12 +1,11 @@
+use crate::response::AppError;
 use crate::state::AppState;
 use axum::{
     extract::FromRequestParts,
-    http::{header::AUTHORIZATION, request::Parts, StatusCode},
-    Json,
+    http::{header::AUTHORIZATION, request::Parts},
 };
 use jsonwebtoken::{decode, DecodingKey, Validation};
 use serde::{Deserialize, Serialize};
-use serde_json::json;
 use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -19,18 +18,14 @@ pub struct Claims {
 pub struct AuthUser(pub Uuid);
 
 impl FromRequestParts<AppState> for AuthUser {
-    type Rejection = (StatusCode, Json<serde_json::Value>);
+    type Rejection = AppError;
 
     async fn from_request_parts(
         parts: &mut Parts,
         state: &AppState,
     ) -> Result<Self, Self::Rejection> {
-        let unauthorized = || {
-            (
-                StatusCode::UNAUTHORIZED,
-                Json(json!({ "error": "missing or invalid authorization token" })),
-            )
-        };
+        let unauthorized =
+            || AppError::Unauthorized("missing or invalid authorization token".into());
 
         let token = parts
             .headers

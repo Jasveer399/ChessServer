@@ -2,6 +2,7 @@ mod db;
 mod handlers;
 mod models;
 mod repositories;
+mod response;
 mod routes;
 mod services;
 mod state;
